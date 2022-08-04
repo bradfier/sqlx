@@ -7,7 +7,7 @@ use std::fmt::Debug;
 use std::hash::Hash;
 use std::time::Instant;
 
-pub(crate) struct QueryLogger<'q> {
+pub struct QueryLogger<'q> {
     sql: &'q str,
     rows_returned: u64,
     rows_affected: u64,
@@ -16,7 +16,7 @@ pub(crate) struct QueryLogger<'q> {
 }
 
 impl<'q> QueryLogger<'q> {
-    pub(crate) fn new(sql: &'q str, settings: LogSettings) -> Self {
+    pub fn new(sql: &'q str, settings: LogSettings) -> Self {
         Self {
             sql,
             rows_returned: 0,
@@ -26,15 +26,15 @@ impl<'q> QueryLogger<'q> {
         }
     }
 
-    pub(crate) fn increment_rows_returned(&mut self) {
+    pub fn increment_rows_returned(&mut self) {
         self.rows_returned += 1;
     }
 
-    pub(crate) fn increase_rows_affected(&mut self, n: u64) {
+    pub fn increase_rows_affected(&mut self, n: u64) {
         self.rows_affected += n;
     }
 
-    pub(crate) fn finish(&self) {
+    pub fn finish(&self) {
         let elapsed = self.start.elapsed();
 
         let lvl = if elapsed >= self.settings.slow_statements_duration {
@@ -85,7 +85,7 @@ impl<'q> Drop for QueryLogger<'q> {
 }
 
 #[cfg(feature = "sqlite")]
-pub(crate) struct QueryPlanLogger<'q, O: Debug + Hash + Eq, R: Debug + Hash + Eq, P: Debug> {
+pub struct QueryPlanLogger<'q, O: Debug + Hash + Eq, R: Debug + Hash + Eq, P: Debug> {
     sql: &'q str,
     unknown_operations: HashSet<O>,
     results: HashSet<R>,
@@ -95,7 +95,7 @@ pub(crate) struct QueryPlanLogger<'q, O: Debug + Hash + Eq, R: Debug + Hash + Eq
 
 #[cfg(feature = "sqlite")]
 impl<'q, O: Debug + Hash + Eq, R: Debug + Hash + Eq, P: Debug> QueryPlanLogger<'q, O, R, P> {
-    pub(crate) fn new(sql: &'q str, settings: LogSettings) -> Self {
+    pub fn new(sql: &'q str, settings: LogSettings) -> Self {
         Self {
             sql,
             unknown_operations: HashSet::new(),
@@ -105,19 +105,19 @@ impl<'q, O: Debug + Hash + Eq, R: Debug + Hash + Eq, P: Debug> QueryPlanLogger<'
         }
     }
 
-    pub(crate) fn add_result(&mut self, result: R) {
+    pub fn add_result(&mut self, result: R) {
         self.results.insert(result);
     }
 
-    pub(crate) fn add_program(&mut self, program: Vec<P>) {
+    pub fn add_program(&mut self, program: Vec<P>) {
         self.program = program;
     }
 
-    pub(crate) fn add_unknown_operation(&mut self, operation: O) {
+    pub fn add_unknown_operation(&mut self, operation: O) {
         self.unknown_operations.insert(operation);
     }
 
-    pub(crate) fn finish(&self) {
+    pub fn finish(&self) {
         let lvl = self.settings.statements_level;
 
         if let Some(lvl) = lvl
